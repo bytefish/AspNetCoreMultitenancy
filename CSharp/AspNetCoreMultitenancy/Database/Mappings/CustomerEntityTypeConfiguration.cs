@@ -11,7 +11,7 @@ namespace AspNetCoreMultitenancy.Database.Mappings
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
             builder
-                .ToTable("sample", "customer")
+                .ToTable("customer", "sample")
                 .HasKey(x => x.Id);
 
             builder
