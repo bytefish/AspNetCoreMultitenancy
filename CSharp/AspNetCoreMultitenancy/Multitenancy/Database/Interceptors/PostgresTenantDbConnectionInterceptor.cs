@@ -37,14 +37,7 @@ namespace AspNetCoreMultitenancy.Multitenancy
 
         private void PrepareCommand(DbCommand cmd, Tenant tenant)
         {
-            cmd.CommandText = "SET app.current_tenant = @tenant_id";
-
-            DbParameter pTenantName = cmd.CreateParameter();
-
-            pTenantName.ParameterName = "@tenant_id";
-            pTenantName.Value = tenant.Name;
-
-            cmd.Parameters.Add(pTenantName);
+            cmd.CommandText = $"SET app.current_tenant = '{tenant.Name}'";
         }
     }
 }
