@@ -2,7 +2,6 @@
 
 using AspNetCoreMultitenancy.Database.Mappings;
 using AspNetCoreMultitenancy.Models;
-using AspNetCoreMultitenancy.Multitenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCoreMultitenancy.Database
