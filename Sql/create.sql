@@ -58,8 +58,11 @@ GRANT USAGE ON SCHEMA sample TO app_user;
 -------------------------------------
 -- GRANT TABLE                     --
 -------------------------------------
+GRANT SELECT ON TABLE sample.tenant TO app_user;
+
 GRANT ALL ON SEQUENCE sample.customer_customer_id_seq TO app_user;
 GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE sample.customer TO app_user;
+
 
 -------------------------------------
 -- SAMPLE DATA                     --

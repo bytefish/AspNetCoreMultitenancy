@@ -29,26 +29,30 @@ namespace AspNetCoreMultitenancy.Multitenancy
         public async Task InvokeAsync(HttpContext context, TenantDbContext tenantDbContext)
         {
             // Try to get the Tenant Name from the Header:
-            var tenantName = context.Request.Headers[TenantHeaderName];
-            
-            // It's probably empty, which may or may not be valid for your 
-            // scenario. If a Tenant Name is given and you can not 
-            if(!string.IsNullOrWhiteSpace(tenantName))
+            if (context.Request.Headers.ContainsKey(TenantHeaderName))
             {
-                var tenant = await tenantDbContext.Tenants
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Name == tenantName, context.RequestAborted);
+                string tenantName = context.Request.Headers[TenantHeaderName];
 
-                if(tenant == null)
+                // It's probably OK for the Tenant Name to be empty, which may or may not be valid for your scenario.
+                if (!string.IsNullOrWhiteSpace(tenantName))
                 {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Invalid Tenant Name", context.RequestAborted);
+                    var tenantNameString = tenantName.ToString();
 
-                    return;
+                    var tenant = await tenantDbContext.Tenants
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Name == tenantNameString, context.RequestAborted);
+
+                    if (tenant == null)
+                    {
+                        context.Response.StatusCode = 400;
+                        await context.Response.WriteAsync("Invalid Tenant Name", context.RequestAborted);
+
+                        return;
+                    }
+
+                    // We know the Tenant, so set it in the TenantExecutionContext:
+                    TenantExecutionContext.SetTenant(tenant);
                 }
-
-                // We know the Tenant, so set it in the TenantExecutionContext:
-                TenantExecutionContext.SetTenant(tenant);
             }
 
             await _next(context);
