@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace AspNetCoreMultitenancy
 {
@@ -26,13 +27,18 @@ namespace AspNetCoreMultitenancy
             // Register Scoped DbContexts:
             services
                 // Register the Tenant Database:
-                .AddDbContext<TenantDbContext>(options => options.UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"))
+                .AddDbContext<TenantDbContext>(options => options.UseNpgsql("Host=d-bkp2;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"))
                 // Register the Application Database:
                 .AddDbContext<ApplicationDbContext>(options => options
                     .AddInterceptors(new PostgresTenantDbConnectionInterceptor())
-                    .UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
+                    .UseNpgsql("Host=d-bkp2;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
 
             services.AddControllers();
+            services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Multitenancy API", Version = "v1" });
+                    c.OperationFilter<AddHeaderParameter>();
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +63,10 @@ namespace AspNetCoreMultitenancy
             {
                 endpoints.MapControllers();
             });
+            app.UseSwagger();
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V2");
+            });            
         }
     }
 }
