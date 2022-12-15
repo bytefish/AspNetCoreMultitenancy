@@ -34,11 +34,14 @@ namespace AspNetCoreMultitenancy
                     .UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
 
             services.AddControllers();
-            services.AddSwaggerGen(c =>
+            if (env.IsDevelopment())
+            {
+                services.AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Multitenancy API", Version = "v1" });
                     c.OperationFilter<AddHeaderParameter>();
                 });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,10 +66,12 @@ namespace AspNetCoreMultitenancy
             {
                 endpoints.MapControllers();
             });
-            app.UseSwagger();
-            app.UseSwaggerUI(c => {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V2");
-            });            
+             if (env.IsDevelopment())
+             {
+                 app.UseSwagger();
+                app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Multitenancy API V1"); });            
+             }
         }
     }
 }
