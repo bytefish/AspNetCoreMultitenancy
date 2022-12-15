@@ -27,11 +27,11 @@ namespace AspNetCoreMultitenancy
             // Register Scoped DbContexts:
             services
                 // Register the Tenant Database:
-                .AddDbContext<TenantDbContext>(options => options.UseNpgsql("Host=d-bkp2;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"))
+                .AddDbContext<TenantDbContext>(options => options.UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"))
                 // Register the Application Database:
                 .AddDbContext<ApplicationDbContext>(options => options
                     .AddInterceptors(new PostgresTenantDbConnectionInterceptor())
-                    .UseNpgsql("Host=d-bkp2;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
+                    .UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
