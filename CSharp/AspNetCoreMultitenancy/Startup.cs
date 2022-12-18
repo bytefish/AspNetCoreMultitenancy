@@ -25,16 +25,19 @@ namespace AspNetCoreMultitenancy
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var tenantsDb = Configuration["Tenants:TenantDb"];
+            var appDb = Configuration["Tenants:AppDb"];
             // Register Scoped DbContexts:
             services
                 // Register the Tenant Database:
-                .AddDbContext<TenantDbContext>(options => options.UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"))
+                  .AddDbContext<TenantDbContext>(options => options.UseNpgsql(tenantsDb))
                 // Register the Application Database:
                 .AddDbContext<ApplicationDbContext>(options => options
                     .AddInterceptors(new PostgresTenantDbConnectionInterceptor())
-                    .UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
+                    .UseNpgsql(appDb));
 
             services.AddControllers();
+
             if (CurrentEnvironment.IsDevelopment())
             {
                 services.AddSwaggerGen(c =>
