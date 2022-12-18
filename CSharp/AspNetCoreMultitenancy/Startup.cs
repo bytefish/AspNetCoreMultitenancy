@@ -14,13 +14,14 @@ namespace AspNetCoreMultitenancy
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
 
         public IConfiguration Configuration { get; }
-
+        private IWebHostEnvironment CurrentEnvironment { get; set; }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -34,7 +35,7 @@ namespace AspNetCoreMultitenancy
                     .UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
 
             services.AddControllers();
-            if (env.IsDevelopment())
+            if (CurrentEnvironment.IsDevelopment())
             {
                 services.AddSwaggerGen(c =>
                 {
