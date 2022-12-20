@@ -6,6 +6,8 @@ This project is an example for Multi Tenancy with ASP.NET Core and PostgreSQL Ro
 
 * https://www.bytefish.de/blog/aspnetcore_multitenancy.html
 
+A Swagger UI has been added, so you can also use Swagger to run the examples.
+
 ### Example ###
 
 
