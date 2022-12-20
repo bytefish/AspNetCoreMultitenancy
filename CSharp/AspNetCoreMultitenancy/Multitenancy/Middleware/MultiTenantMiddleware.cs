@@ -15,7 +15,7 @@ namespace AspNetCoreMultitenancy.Multitenancy
     public class MultiTenantMiddleware
     {
         /// <summary>
-        /// The Header "X-TenantName" the Request contains.
+        /// The client sends a header "X-TenantName" with tenant name.
         /// </summary>
         private static readonly string TenantHeaderName = "X-TenantName";
 

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace AspNetCoreMultitenancy
 {
@@ -19,20 +20,27 @@ namespace AspNetCoreMultitenancy
         }
 
         public IConfiguration Configuration { get; }
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             // Register Scoped DbContexts:
             services
                 // Register the Tenant Database:
-                .AddDbContext<TenantDbContext>(options => options.UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"))
+                  .AddDbContext<TenantDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("TenantDatabase")))
                 // Register the Application Database:
                 .AddDbContext<ApplicationDbContext>(options => options
                     .AddInterceptors(new PostgresTenantDbConnectionInterceptor())
-                    .UseNpgsql("Host=localhost;Port=5432;Database=sampledb;Pooling=false;User Id=app_user;Password=app_user;"));
+                    .UseNpgsql(Configuration.GetConnectionString("ApplicationDatabase")));
 
             services.AddControllers();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ASP.NET Core Multitenant API", Version = "v1" });
+
+                c.OperationFilter<AddTenantHeaderOperationFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +49,9 @@ namespace AspNetCoreMultitenancy
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             else
             {
