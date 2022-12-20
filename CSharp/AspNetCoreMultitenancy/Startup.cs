@@ -14,38 +14,33 @@ namespace AspNetCoreMultitenancy
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            CurrentEnvironment = env;
         }
 
         public IConfiguration Configuration { get; }
-        private IWebHostEnvironment CurrentEnvironment { get; set; }
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var tenantsDb = Configuration["Tenants:TenantDb"];
-            var appDb = Configuration["Tenants:AppDb"];
             // Register Scoped DbContexts:
             services
                 // Register the Tenant Database:
-                  .AddDbContext<TenantDbContext>(options => options.UseNpgsql(tenantsDb))
+                  .AddDbContext<TenantDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("TenantDatabase")))
                 // Register the Application Database:
                 .AddDbContext<ApplicationDbContext>(options => options
                     .AddInterceptors(new PostgresTenantDbConnectionInterceptor())
-                    .UseNpgsql(appDb));
+                    .UseNpgsql(Configuration.GetConnectionString("ApplicationDatabase")));
 
             services.AddControllers();
 
-            if (CurrentEnvironment.IsDevelopment())
+            services.AddSwaggerGen(c =>
             {
-                services.AddSwaggerGen(c =>
-                {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Multitenancy API", Version = "v1" });
-                    c.OperationFilter<AddHeaderParameter>();
-                });
-            }
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ASP.NET Core Multitenant API", Version = "v1" });
+
+                c.OperationFilter<AddTenantHeaderOperationFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +49,9 @@ namespace AspNetCoreMultitenancy
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             else
             {
@@ -70,12 +68,6 @@ namespace AspNetCoreMultitenancy
             {
                 endpoints.MapControllers();
             });
-             if (env.IsDevelopment())
-             {
-                 app.UseSwagger();
-                app.UseSwaggerUI(c => {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Multitenancy API V1"); });            
-             }
         }
     }
 }
